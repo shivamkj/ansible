@@ -1,0 +1,7 @@
+home_server:
+  hosts:
+    server01:
+      ansible_port: 22
+      ansible_host: 192.168.1.7
+      ansible_ssh_private_key_file: ~/.ssh/home_server
+      ansible_user: shivam

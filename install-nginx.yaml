@@ -1,0 +1,41 @@
+# SOURCE: https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/
+# SOURCE: https://nginx.org/en/linux_packages.html
+- hosts: "{{ host }}"
+  gather_facts: yes
+  become: true
+  vars:
+    nginx_version: 1:1.24.0-1.el9.ngx.x86_64
+  tasks:
+    - name: Setup yum repository
+      ansible.builtin.copy:
+        dest: "/etc/yum.repos.d/nginx.repo"
+        content: |
+          [nginx-stable]
+          name=nginx stable repo
+          baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+          gpgcheck=1
+          enabled=1
+          gpgkey=https://nginx.org/keys/nginx_signing.key
+          module_hotfixes=true
+
+          [nginx-mainline]
+          name=nginx mainline repo
+          baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+          gpgcheck=1
+          enabled=0
+          gpgkey=https://nginx.org/keys/nginx_signing.key
+          module_hotfixes=true
+    - name: Install Nginx
+      ansible.builtin.dnf:
+        name: "nginx-{{ nginx_version }}"
+        update_cache: true
+        state: present
+    - name: Start and enable Nginx service
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: started
+        enabled: yes
+    - name: Verify that Nginx is listening on port 80 with 200 status
+      ansible.builtin.uri:
+        url: http://127.0.0.1:80
+        status_code: 200
